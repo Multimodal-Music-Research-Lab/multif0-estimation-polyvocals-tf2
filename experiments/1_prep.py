@@ -44,7 +44,7 @@ def main(args):
     print("{} mixes to be processed".format(nmixes))
     idx=0
 
-    Parallel(n_jobs=4, verbose=5)(
+    Parallel(n_jobs=2, verbose=5)(
             delayed(utils.compute_features_mtrack)(
                 mtrack, args.save_dir, args.wavmixes_path, idx
             ) for mtrack in mtracks)

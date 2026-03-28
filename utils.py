@@ -300,23 +300,53 @@ def compute_multif0_complete(mtrack, save_dir, wavmixes_path):
         )
 
 
-    if os.path.exists(multif0_mix_path):
+    tmp_mix_path = None  # track temp file for cleanup (Workaround 3)
 
-        times, freqs = get_all_pitch_annotations(
-            mtrack)
+    if os.path.exists(multif0_mix_path):
+        audio_path_to_use = multif0_mix_path
+
+    elif 'source_files' in mtrack and 'audio_folder' in mtrack:
+        # Workaround 3: mix sources on-the-fly so no pre-generated mix file
+        # is required on disk.  Uses librosa + soundfile via a NamedTemp file.
+        import tempfile
+        import soundfile as sf
+
+        print("    > mix file absent; mixing sources on-the-fly for {}".format(
+            mtrack['filename']))
+        sources = []
+        sr_mix = None
+        for fn in mtrack['source_files']:
+            y, sr = librosa.load(
+                os.path.join(mtrack['audio_folder'], fn), sr=None, mono=True)
+            sources.append(y)
+            if sr_mix is None:
+                sr_mix = sr
+
+        # Pad shorter sources and sum
+        max_len = max(len(s) for s in sources)
+        mix = sum(np.pad(s, (0, max_len - len(s))) for s in sources)
+
+        tmp = tempfile.NamedTemporaryFile(suffix='.wav', delete=False)
+        tmp.close()
+        sf.write(tmp.name, mix, sr_mix)
+        tmp_mix_path = tmp.name
+        audio_path_to_use = tmp_mix_path
+
     else:
         print("{} audio file does NOT exist".format(mtrack))
         return
 
-    if times is not None:
+    try:
+        times, freqs = get_all_pitch_annotations(mtrack)
 
-        X, Y, f, t = get_input_output_pairs_pump(
-            multif0_mix_path, times, freqs)
-
-        save_data(save_dir, input_path, output_path, prefix, X, Y, f, t)
-
-    else:
-        print("    {} No multif0 data".format(mtrack['filename']))
+        if times is not None:
+            X, Y, f, t = get_input_output_pairs_pump(audio_path_to_use, times, freqs)
+            save_data(save_dir, input_path, output_path, prefix, X, Y, f, t)
+        else:
+            print("    {} No multif0 data".format(mtrack['filename']))
+    finally:
+        if tmp_mix_path is not None and os.path.exists(tmp_mix_path):
+            os.remove(tmp_mix_path)
 
 def compute_features_mtrack(mtrack, save_dir, wavmixes_path, idx):
 

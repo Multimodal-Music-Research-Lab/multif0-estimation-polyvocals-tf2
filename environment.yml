@@ -1,4 +1,4 @@
-name: mf0_keras
+name: multif0_env
 channels:
   - pytorch
   - defaults
@@ -309,4 +309,3 @@ dependencies:
       - referencing==0.35.1
       - rpds-py==0.20.1
       - sortedcontainers==2.4.0
-prefix: /storage/scratch/vissc022/anaconda/envs/mf0_keras

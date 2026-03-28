@@ -9,6 +9,8 @@ except ImportError:
 
 import numpy as np    
 
+import tensorflow as tf
+
 from keras import backend as K
 
 # this file contains legacy keras code that allows loading the old serialized model
@@ -370,7 +372,9 @@ def load_weights_from_hdf5_group(f, layers, reshape=False):
     # K.batch_set_value(weight_value_tuples) FIXME - this function is no longer available
     for x, value in weight_value_tuples:
         # value = np.asarray(value, dtype=x.dtype.name)
-        value = np.asarray(value, dtype=x.dtype)
+        # Convert TensorFlow dtype to NumPy-compatible dtype
+        numpy_dtype = tf.as_dtype(x.dtype).as_numpy_dtype
+        value = np.asarray(value, dtype=numpy_dtype)
         x.assign(value)
 
 def load_weights_from_hdf5_group_by_name(f, layers, skip_mismatch=False,

@@ -4,26 +4,23 @@ Dataset structure is created here
 '''
 
 import itertools
+import os
 import numpy as np
-import pandas as pd
 
 
 '''Paths
 '''
-audio_save_folder = '/scratch/hc2945/data/audiomixtures/'
-data_save_folder = '/scratch/hc2945/data/features_targets/'
-exper_output = '/scratch/hc2945/data/experiment_output/'
+_DAST_BASE = os.environ['DAST_BASE']
+audio_save_folder = f'{_DAST_BASE}/data/processed/training/audiomixtures/'
+data_save_folder  = f'{_DAST_BASE}/data/processed/training/features_targets/'
+exper_output      = f'{_DAST_BASE}/data/processed/training/experiment_output/'
 
 
 # audio folders
-csd_folder = '/scratch/hc2945/data/CSD/'
-ecs_folder = '/scratch/hc2945/data/ECS/'
-dcs_folder_audio = '/scratch/hc2945/data/DCS/audio_wav_22050_mono/'
-dcs_folder_annot = '/scratch/hc2945/data/DCS/annotations_csv_F0_PYIN/'
-bc_folder_audio = '/scratch/hc2945/data/BachChorales/BC/'
-bc_folder_annot = '/scratch/hc2945/data/BachChorales/BC/pyin_annot/constant_timebase/'
-bsq_folder_audio = '/scratch/hc2945/data/BarbershopQuartets/BQ/'
-bsq_folder_annot = '/scratch/hc2945/data/BarbershopQuartets/BQ/pyin_annot/constant_timebase'
+csd_folder        = f'{_DAST_BASE}/data/raw/ChoralSingingDataset/'
+ecs_folder        = f'{_DAST_BASE}/data/raw/EsmucChoirDataset_v1.0.0/'
+dcs_folder_audio  = f'{_DAST_BASE}/data/raw/DagstuhlChoirSet_V1.2.3/audio_wav_22050_mono/'
+dcs_folder_annot  = f'{_DAST_BASE}/data/raw/DagstuhlChoirSet_V1.2.3/annotations_csv_F0_PYIN/'
 
 
 '''All variables and parameters related to the dataset creation
@@ -33,8 +30,6 @@ dataset = dict()
 dataset['CSD'] = dict()
 dataset['DCS'] = dict()
 dataset['ECS'] = dict()
-dataset['BC'] = dict()
-dataset['BSQ'] = dict()
 
 augmentation_idx = ['0_', '1_', '2_', '3_', '4_']
 
@@ -68,7 +63,7 @@ dataset['CSD']['combos'] = combos
 ''' Der Greis
 '''
 
-ecs_dg = ['DG_take1', 'DG_take2', 'DG_take3_mixed', 'DG_take4_mixed']
+ecs_dg = ['DG_FT_take1', 'DG_FT_take2', 'DG_FT_take3', 'DG_FT_take4']
 
 singers_ecs_dg = [
     'S1', 'S2', 'S3', 'S4',
@@ -101,12 +96,12 @@ dataset['ECS']['DG_combos'] = combos
 ''' Die Himmel
 '''
 
-ecs_dh = ['DH1_take2', 'DH2_take1']
+ecs_dh = ['DH1_FT_take1', 'DH2_FT_take1']
 
 singers_ecs_dh = [
-    'S1-1', 'S2-1', 'S3-2', 'S4-2', 'S5-2',
+    'S1', 'S2', 'S3', 'S4', 'S5',
     'A1', 'A2',
-    'T1-1', 'T2-1', 'T3-2',
+    'T1', 'T2', 'T3',
     'B1', 'B2'
 ]
 
@@ -136,8 +131,9 @@ dataset['ECS']['DH_combos'] = combos
 ''' Seele Christi
 '''
 
-ecs_sc = ['SC1_take1', 'SC1_take2', 'SC1_take3_mixed', 'SC2_take1',
-          'SC2_take2', 'SC2_take3_mixed', 'SC3_take1', 'SC3_take2_mixed']
+ecs_sc = ['SC1_FT_take1', 'SC1_FT_take2', 'SC1_FT_take3',
+          'SC2_FT_take1', 'SC2_FT_take2', 'SC2_FT_take3',
+          'SC3_FT_take1', 'SC3_FT_take2']
 
 
 singers_ecs_sc = [
@@ -179,13 +175,6 @@ singers_QB = ['S1_DYN', 'A2_DYN', 'T2_DYN', 'B2_DYN']
 singers_QA = ['S2_DYN', 'A1_DYN', 'T1_DYN', 'B1_DYN']
 singers_all_dyn = ['S1_DYN', 'A2_DYN', 'T2_DYN', 'B2_DYN']
 
-'''dcs_songs = [
-    'DLI_All_Take1_', 'DLI_All_Take2_', 'DLI_All_Take3_',
-    'DLI_QuartetA_Take1_', 'DLI_QuartetA_Take2_', 'DLI_QuartetA_Take3_', 'DLI_QuartetA_Take4_', 'DLI_QuartetA_Take5_',
-    'DLI_QuartetA_Take6_', 'DLI_QuartetB_Take1_', 'DLI_QuartetB_Take2_', 'DLI_QuartetB_Take2_', 'DLI_QuartetB_Take3_',
-    'DLI_QuartetB_Take4_', 'DLI_QuartetB_Take5_']
-'''
-
 # no combos because these are quartets (inside the full choir)
 dcs_songs_fc = ['DCS_LI_FullChoir_Take01', 'DCS_LI_FullChoir_Take02', 'DCS_LI_FullChoir_Take03']
 dcs_singers_fc = ['S1_DYN', 'A2_DYN', 'T2_DYN', 'B2_DYN']
@@ -219,41 +208,6 @@ dataset['DCS']['QB_songs'] = []
 for song in dcs_songs_qb:
     for idx in augmentation_idx:
         dataset['DCS']['QB_songs'].append(idx + song)
-
-''' Bach Chorales
-'''
-bc = pd.read_csv('/scratch/hc2945/data/BC_info.csv').values
-
-dataset['BC']['songs'] = []
-dataset['BC']['num_parts'] = []
-idx=0
-for song in bc[:, 0]:
-    idx += 1
-    basename = "{}_{}".format(idx, song)
-    for aug_idx in augmentation_idx:
-        dataset['BC']['songs'].append(aug_idx + basename)
-        dataset['BC']['num_parts'].append(bc[idx-1, 6])
-
-dataset['BC']['singers'] = [bc[0, 1], bc[0, 2], bc[0, 3], bc[0, 4]]
-#dataset['BC']['num_parts'] = bc[:, 6]
-
-
-'''Barbershop Quartets
-'''
-bq = pd.read_csv('/scratch/hc2945/data/BQ_info.csv').values
-
-dataset['BSQ']['songs'] = []
-dataset['BSQ']['num_parts'] = []
-idx=0
-for song in bq[:, 0]:
-    idx += 1
-    basename = "{}_{}".format(idx, song)
-    for aug_idx in augmentation_idx:
-        dataset['BSQ']['songs'].append(aug_idx + basename)
-        dataset['BSQ']['num_parts'].append(bq[idx-1, 6])
-
-dataset['BSQ']['singers'] = [bq[0, 1], bq[0, 2], bq[0, 3], bq[0, 4]]
-#dataset['BSQ']['num_parts'] = bq[:, 6]
 
 
 '''Training parameters

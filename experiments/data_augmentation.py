@@ -31,7 +31,7 @@ def create_jams(times, freqs, outfile):
 
     for t, p in zip(times, freqs):
 
-        if p != 0:
+        if p > 0:
             pitch_a.append(
                 time=t,
                 duration=0.0,
@@ -42,7 +42,7 @@ def create_jams(times, freqs, outfile):
             pitch_a.append(
                 time=t,
                 duration=0.0,
-                value={'index': 0, 'frequency': p, 'voiced': False},
+                value={'index': 0, 'frequency': abs(p), 'voiced': False},
                 confidence=1.0
             )
 
@@ -57,14 +57,14 @@ def read_annotations_f0(annot_fname, annot_path, dataset=None):
     if annot_fname.endswith('f0'):
 
         if dataset == 'ECS':
-            # loadtxt fails with some ECS files
-            # annotation = np.loadtxt(os.path.join(annot_path, annot_fname))
+            # ECS f0 files are space-separated
             annotation = []
             with open(os.path.join(annot_path, annot_fname), newline='\n') as f:
-                reader = csv.reader(f, delimiter='\t')
-                for line in reader:
-                    annotation.append([float(line[0]), float(line[1])])
-                annotation = np.array(annotation)
+                for line in f:
+                    parts = line.strip().split()
+                    if len(parts) >= 2:
+                        annotation.append([float(parts[0]), float(parts[1])])
+            annotation = np.array(annotation)
         else:
             print("CSD: {}".format(annot_path))
             annotation = np.loadtxt(os.path.join(annot_path, annot_fname))
@@ -169,12 +169,15 @@ def main(args):
                 create_jams(orig_times, orig_freqs, outfile)
 
             # step 3 is pitch-shifting audio and annotations accordingly
-            if fn.endswith('f0'):
-                pitch_shifting(fn.replace('f0', 'wav'), fn.replace('f0', 'jams'), args.path_to_audio,
-                               args.path_to_annotations)
-            elif fn.endswith('csv'):
-                pitch_shifting(fn.replace('csv', 'wav'), fn.replace('csv', 'jams'), args.path_to_audio,
-                               args.path_to_annotations)
+            try:
+                if fn.endswith('f0'):
+                    pitch_shifting(fn.replace('f0', 'wav'), fn.replace('f0', 'jams'), args.path_to_audio,
+                                   args.path_to_annotations)
+                elif fn.endswith('csv'):
+                    pitch_shifting(fn.replace('csv', 'wav'), fn.replace('csv', 'jams'), args.path_to_audio,
+                                   args.path_to_annotations)
+            except Exception as e:
+                print("Skipping {} due to error: {}".format(fn, e))
 
 
 if __name__ == "__main__":
