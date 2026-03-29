@@ -15,6 +15,7 @@ The pipeline covers: audio mixing → feature extraction → training → infere
 - **System dependency**: `sox` must be installed (`apt-get install sox` or `conda install -c conda-forge sox`)
 - The `ir/IR_greathall.wav` impulse response file must be present in `ir/` (not tracked in git; copy manually to server)
 
+
 # Pipeline execution order
 1. `python experiments/data_augmentation.py` — pitch-shift augmentation (one-time, if not done)
 2. `python experiments/run_pipeline.py` — batch audio mixing + feature extraction (section by section to save disk)
@@ -26,3 +27,19 @@ The pipeline covers: audio mixing → feature extraction → training → infere
 - Do NOT write into any `raw/` folders. All processed data must go into `processed/`
 - Do not write unnecessary large files. Minimise storage utilisation.
 - Audio mixtures: prefer FLAC over WAV (use `0_setup_duet.py`; delete mixes after feature extraction via `run_pipeline.py`)
+
+## Execution
+- **Never run scripts or commands yourself.** Always provide the command for the user to run manually in their remote SSH terminal.
+- After providing a command to run, wait for the user to report back before proceeding.
+ 
+## Logging
+- Always wrap run commands with `tee` to save output to a timestamped log file:
+  ```bash
+  mkdir -p ~/logs
+  python script.py 2>&1 | tee ~/logs/<script_name>_$(date +%Y%m%d_%H%M%S).log
+  ```
+- Always capture both stdout and stderr (`2>&1`).
+ 
+## Debugging
+- When debugging, always read the latest log file in `~/logs/` first before asking the user for error output.
+- The logs directory is accessible locally at `~/remote-mount/logs/`.
