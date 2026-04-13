@@ -59,9 +59,15 @@ def resolve_paths(dataset, tid, csd_meta):
             RAW, 'DagstuhlChoirSet_V1.2.3', 'audio_wav_22050_mono',
             f'{tid}.wav'
         )
+        # Manual annotations only exist for LRX microphone.
+        # DYN/HSM variants of the same recording share the LRX annotation.
+        if tid.endswith('_DYN') or tid.endswith('_HSM'):
+            annot_tid = tid[:-4] + '_LRX'
+        else:
+            annot_tid = tid
         annot = os.path.join(
             RAW, 'DagstuhlChoirSet_V1.2.3', 'annotations_csv_F0_manual',
-            f'{tid}.csv'
+            f'{annot_tid}.csv'
         )
         fmt = 'csv_time_f0'
 
