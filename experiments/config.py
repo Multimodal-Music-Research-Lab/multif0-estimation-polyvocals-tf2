@@ -5,22 +5,30 @@ Dataset structure is created here
 
 import itertools
 import os
+import os
+from dotenv import load_dotenv
 import numpy as np
 
 
 '''Paths
 '''
-_DAST_BASE = os.environ['DAST_BASE']
-audio_save_folder = f'{_DAST_BASE}/data/processed/training/audiomixtures/'
-data_save_folder  = f'{_DAST_BASE}/data/processed/training/features_targets/'
-exper_output      = f'{_DAST_BASE}/data/processed/training/experiment_output/'
+
+load_dotenv()  # Loads variables from .env
+
+_DAST_BASE = os.getenv("DAST_BASE")
+# exper_output      = f'{_DAST_BASE}/data/processed/training/experiment_output/'
+RAW_DATA_ROOT      = os.environ.get('RAW_DATA_ROOT', '/mnt/ssd/wqlim/data')
+audio_save_folder = f'{RAW_DATA_ROOT}/processed/training/audiomixtures/'
+data_save_folder  = f'{RAW_DATA_ROOT}/processed/training/features_targets/'
+exper_output      = f'{RAW_DATA_ROOT}/processed/training/experiment_output/'
+models_save_folder = f'{_DAST_BASE}/data/processed/training/models/'
 
 
 # audio folders
-csd_folder        = f'{_DAST_BASE}/data/raw/ChoralSingingDataset/'
-ecs_folder        = f'{_DAST_BASE}/data/raw/EsmucChoirDataset_v1.0.0/'
-dcs_folder_audio  = f'{_DAST_BASE}/data/raw/DagstuhlChoirSet_V1.2.3/audio_wav_22050_mono/'
-dcs_folder_annot  = f'{_DAST_BASE}/data/raw/DagstuhlChoirSet_V1.2.3/annotations_csv_F0_PYIN/'
+csd_folder        = f'{RAW_DATA_ROOT}/raw/ChoralSingingDataset/'
+ecs_folder        = f'{RAW_DATA_ROOT}/raw/EsmucChoirDataset_v1.0.0/'
+dcs_folder_audio  = f'{RAW_DATA_ROOT}/raw/DagstuhlChoirSet_V1.2.3/audio_wav_22050_mono/'
+dcs_folder_annot  = f'{RAW_DATA_ROOT}/raw/DagstuhlChoirSet_V1.2.3/annotations_csv_F0_PYIN/'
 
 
 '''All variables and parameters related to the dataset creation
