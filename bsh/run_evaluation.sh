@@ -9,7 +9,7 @@
 set -euo pipefail
 mkdir -p ~/logs
 cd "$(dirname "$0")/.."
-PYTHONPATH=. uv run python experiments/evaluate_dast.py \
+CUDA_VISIBLE_DEVICES=1,2,3 PYTHONPATH=. uv run python experiments/evaluate_dast.py \
     --save-key dast_model3_v1 \
     --data-splits-file data_splits.json \
     --splits train,validate,test \

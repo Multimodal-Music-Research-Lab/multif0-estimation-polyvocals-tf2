@@ -22,6 +22,12 @@ import argparse
 import json
 import os
 
+# Enable GPU memory growth before any TF/Keras import to avoid pre-allocating
+# all available memory (GPU:0 may have little free memory due to other jobs).
+import tensorflow as tf
+for _gpu in tf.config.list_physical_devices('GPU'):
+    tf.config.experimental.set_memory_growth(_gpu, True)
+
 import mir_eval
 import numpy as np
 import pandas as pd
