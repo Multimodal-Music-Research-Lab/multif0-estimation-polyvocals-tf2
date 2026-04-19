@@ -3,6 +3,7 @@ Batch evaluation script: run multi-F0 inference on 5 evaluation datasets
 and compute mir_eval.multipitch metrics.
 """
 
+import argparse
 import os
 import traceback
 import numpy as np
@@ -11,8 +12,8 @@ import soundfile as sf
 import librosa
 import mir_eval
 
+from experiments import config
 from models import build_model3
-from load_weights import load_weights
 from utils import create_pump_object, compute_pump_features
 from utils_train import pitch_activations_to_mf0
 
@@ -29,7 +30,6 @@ DATASETS = {
     'pairs_manual_pyin':  f'{DAST_BASE}/data/processed/evaluation/pairs_manual_pyin.csv',
 }
 
-WEIGHTS_PATH = 'models/exp3multif0.pkl'
 PREDICTIONS_DIR = 'predictions'
 MIXES_DIR = os.path.join(PREDICTIONS_DIR, 'mixes')
 ERRORS_LOG = 'evaluation_errors.log'
@@ -222,11 +222,11 @@ def _print_all_summaries(dataset_name, scores_df, summary_rows):
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
-def main():
+def main(args):
     # Load model once
-    print("Loading model...")
+    print(f"Loading model from {args.model_path} ...")
     model = build_model3()
-    load_weights(model, WEIGHTS_PATH)
+    model.load_weights(args.model_path)  # Keras 3 native — works with .keras files
     model.compile()
     print("Model loaded.\n")
 
@@ -379,4 +379,12 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(
+        description='Evaluate multi-F0 model on dAST evaluation pair CSVs.'
+    )
+    parser.add_argument(
+        '--model-path',
+        default=os.path.join(config.models_save_folder, 'dast_model3_v1.keras'),
+        help='Path to trained .keras model file (default: dast_model3_v1.keras in models_save_folder)',
+    )
+    main(parser.parse_args())
