@@ -64,14 +64,14 @@ DATASET_CONFIGS = {
         'meta_index': 0,
         'group_by': ['song', 'setting', 'take'],
         'voice_col': 'voice',
-        'pair_types': [('S', 'A'), ('A', 'T'), ('T', 'B')],
+        'pair_types': None,
     },
     'choral_singing_dataset': {
         'meta_path': os.path.join(PROCESSED, 'ChoralSingingDataset', 'csd_meta.csv'),
         'meta_index': 0,
         'group_by': ['song'],
         'voice_col': 'section',
-        'pair_types': [('soprano', 'alto'), ('alto', 'tenor'), ('tenor', 'bass')],
+        'pair_types': None,
     },
     'cantoria': {
         'meta_path': os.path.join(PROCESSED, 'CantoriaDataset_v1.0.0', 'cantoria_meta.csv'),
@@ -143,7 +143,7 @@ def generate_for_dataset(dataset, cfg, manifest):
 
     seen = set()
     pairs = []
-    for _, group in merged.groupby(group_by):
+    for _, group in merged.groupby(group_by, dropna=False):
         if pair_types is None:
             gen = pairs_all_combinations(group, voice_col)
         else:
